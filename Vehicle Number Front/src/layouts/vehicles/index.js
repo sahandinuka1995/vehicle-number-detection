@@ -12,6 +12,10 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import {vehicleTable} from '../../const/tables'
+import Icon from "@mui/material/Icon";
+import MDButton from "../../components/MDButton";
+import {strings} from "../../const/strings";
+import AddNew from './addNew'
 
 function Vehicles() {
     const data = vehicleTable
@@ -19,6 +23,9 @@ function Vehicles() {
     return (
         <DashboardLayout>
             <DashboardNavbar/>
+            <div align={'right'}>
+                <AddNew/>
+            </div>
             <MDBox pt={6} pb={3}>
                 <Grid container spacing={6}>
                     <Grid item xs={12}>

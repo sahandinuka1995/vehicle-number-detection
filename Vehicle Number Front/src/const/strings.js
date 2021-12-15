@@ -10,6 +10,13 @@ export const strings = {
     // dashboard
     totalVehicles: "Total Vehicles",
     activeVehicles: "Active Vehicles",
-    unsettleVehicles: "Un-Settle Vehicles"
+    unsettleVehicles: "Un-Settle Vehicles",
+
+    // vehicle
+    addNewVehicle: "Add New Vehicle",
+    vehicleNo: "Vehicle No",
+    model: "Model",
+    colour: "Colour",
+    colour: "Colour",
 }
 
