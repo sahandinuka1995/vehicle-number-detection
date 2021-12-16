@@ -4,6 +4,7 @@ import os
 from sqlalchemy.sql import select
 from sqlalchemy.orm import sessionmaker
 import json
+import base64
 
 application = Flask(__name__)
 
@@ -27,6 +28,19 @@ class Vehicle(db.Model):
         self.name = name
         self.number = number
         self.regdate = regdate
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(80), unique=False, nullable=False)
+    password = db.Column(db.String(200), unique=False, nullable=False)
+    vehicleNo = db.Column(db.String(200), unique=False, nullable=False)
+
+    def __init__(self, id, email, password, vehicleNo):
+        self.id = id
+        self.email = email
+        self.password = password
+        self.vehicleNo = vehicleNo
 
 
 db.create_all()
@@ -84,4 +98,21 @@ def add_vehicle():
             "number": number,
             "regDate": regdate
         }
+    }), 200)
+
+
+@application.route('/register/', methods=['POST'])
+def login():
+    email = request.form.get('email')
+    password = request.form.get('password')
+    vehicleNo = request.form.get('vehicleNo')
+
+    user = User(email=email, password=base64.b64encode(password), vehicleNo=vehicleNo)
+    db.session.add(user)
+    db.session.commit()
+
+    return make_response(jsonify({
+        "success": "true",
+        "msg": "User added successfully!",
+        "status": "200"
     }), 200)

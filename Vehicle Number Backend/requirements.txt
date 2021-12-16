@@ -5,3 +5,4 @@ Flask-SQLAlchemy
 pymysql
 boto3
 cryptography
+base64
