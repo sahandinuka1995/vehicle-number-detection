@@ -17,6 +17,5 @@ export const strings = {
     vehicleNo: "Vehicle No",
     model: "Model",
     colour: "Colour",
-    colour: "Colour",
 }
 

@@ -4,30 +4,42 @@ import os
 from sqlalchemy.sql import select
 from sqlalchemy.orm import sessionmaker
 import json
+from json import JSONEncoder
 import base64
+from flask_cors import CORS, cross_origin
 
 application = Flask(__name__)
+cors = CORS(application)
 
+# application.config[
+#     'SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:12345678@aaxunchuu0gulp.c8pmpqzflrw9.us-east-1.rds.amazonaws.com:3306/ebdb"
 application.config[
-    'SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:12345678@aaxunchuu0gulp.c8pmpqzflrw9.us-east-1.rds.amazonaws.com:3306/ebdb"
+    'SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:root@localhost:3306/ebdb"
 db = SQLAlchemy(application)
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+application.config['CORS_HEADERS'] = 'Content-Type'
 
 
 class Vehicle(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=False, nullable=False)
-    number = db.Column(db.String(120), unique=False, nullable=False)
-    regdate = db.Column(db.String(100), unique=False, nullable=False)
+    vehicleNo = db.Column(db.String(120), unique=False, nullable=False)
+    model = db.Column(db.String(100), unique=False, nullable=False)
+    colour = db.Column(db.String(100), unique=False, nullable=False)
+    type = db.Column(db.String(100), unique=False, nullable=False)
 
     def __repr__(self):
         return '<Vehicle %r>' % self.name
 
-    def __init__(self, id, name, number, regdate):
-        self.id = id
+    def __init__(self, name, vehicleNo, model, colour, type):
         self.name = name
-        self.number = number
-        self.regdate = regdate
+        self.vehicleNo = vehicleNo
+        self.model = model
+        self.colour = colour
+        self.type = type
+
+    def toString(self):
+        return self.name + '' + self.vehicleNo + '' + self.model + '' + self.colour + '' + self.type
 
 
 class User(db.Model):
@@ -57,9 +69,7 @@ def search_vehicle():
     name = request.args.get('name')
 
     vehicle = Vehicle.query.filter_by().all()
-    print(vehicle)
-    for i in vehicle:
-        print(i.name)
+    print(Vehicle.toString(vehicle))
 
     return make_response(jsonify({
         "success": "true",
@@ -69,9 +79,12 @@ def search_vehicle():
 
 
 @application.route("/all-vehicle/")
+@cross_origin()
 def all_vehicle():
     vehicles = Vehicle.query.filter_by().all()
-    print(json.dumps(vehicles))
+    for i in vehicles:
+        print(type(i))
+
     return make_response(jsonify({
         "success": "true",
         "status": "200",
@@ -79,26 +92,30 @@ def all_vehicle():
     }), 200)
 
 
-@application.route("/add-vehicle/")
+@application.route("/add-vehicle", methods=['POST'])
+@cross_origin()
 def add_vehicle():
-    name = request.args.get('name')
-    number = request.args.get('number')
-    regdate = request.args.get('regdate')
+    data = request.get_json()
+    result = ''
+    try:
+        vehicle = Vehicle(name=data['name'], vehicleNo=data['vehicleNo'], model=data['model'], colour=data['colour'],
+                          type=data['type'])
+        db.session.add(vehicle)
+        db.session.commit()
 
-    vehicle = Vehicle(name=name, number=number, regdate=regdate)
-    db.session.add(vehicle)
-    db.session.commit()
+        result = make_response(jsonify({
+            "success": "true",
+            "msg": "Vehicle added successfully!",
+            "status": "200"
+        }), 200)
+    except:
+        result = make_response(jsonify({
+            "success": "false",
+            "msg": "Something went wrong",
+            "status": "500"
+        }), 500)
 
-    return make_response(jsonify({
-        "success": "true",
-        "msg": "Vehicle added successfully!",
-        "status": "200",
-        "data": {
-            "name": name,
-            "number": number,
-            "regDate": regdate
-        }
-    }), 200)
+    return result
 
 
 @application.route('/register/', methods=['POST'])

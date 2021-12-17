@@ -12,54 +12,63 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
 import {vehicleTable} from '../../const/tables'
-import Icon from "@mui/material/Icon";
-import MDButton from "../../components/MDButton";
 import {strings} from "../../const/strings";
 import AddNew from './addNew'
+import React, {Component} from "react";
+import {getAllVehicles} from "../../services/vehicle";
 
-function Vehicles() {
-    const data = vehicleTable
+const data = vehicleTable
 
-    return (
-        <DashboardLayout>
-            <DashboardNavbar/>
-            <div align={'right'}>
-                <AddNew/>
-            </div>
-            <MDBox pt={6} pb={3}>
-                <Grid container spacing={6}>
-                    <Grid item xs={12}>
-                        <Card>
-                            <MDBox
-                                mx={2}
-                                mt={-3}
-                                py={3}
-                                px={2}
-                                variant="gradient"
-                                bgColor="info"
-                                borderRadius="lg"
-                                coloredShadow="info"
-                            >
-                                <MDTypography variant="h6" color="white">
-                                    All Vehicles Data
-                                </MDTypography>
-                            </MDBox>
-                            <MDBox pt={3}>
-                                <DataTable
-                                    table={data}
-                                    isSorted={false}
-                                    entriesPerPage={false}
-                                    showTotalEntries={false}
-                                    noEndBorder
-                                />
-                            </MDBox>
-                        </Card>
+class Vehicles extends Component {
+
+    componentDidMount() {
+        getAllVehicles().then(res => {
+            console.log(res)
+        })
+    }
+
+    render() {
+        return (
+            <DashboardLayout>
+                <DashboardNavbar/>
+                <div align={'right'}>
+                    <AddNew/>
+                </div>
+                <MDBox pt={6} pb={3}>
+                    <Grid container spacing={6}>
+                        <Grid item xs={12}>
+                            <Card>
+                                <MDBox
+                                    mx={2}
+                                    mt={-3}
+                                    py={3}
+                                    px={2}
+                                    variant="gradient"
+                                    bgColor="info"
+                                    borderRadius="lg"
+                                    coloredShadow="info"
+                                >
+                                    <MDTypography variant="h6" color="white">
+                                        All Vehicles Data
+                                    </MDTypography>
+                                </MDBox>
+                                <MDBox pt={3}>
+                                    <DataTable
+                                        table={data}
+                                        isSorted={false}
+                                        entriesPerPage={false}
+                                        showTotalEntries={false}
+                                        noEndBorder
+                                    />
+                                </MDBox>
+                            </Card>
+                        </Grid>
                     </Grid>
-                </Grid>
-            </MDBox>
-            <Footer/>
-        </DashboardLayout>
-    );
+                </MDBox>
+                <Footer/>
+            </DashboardLayout>
+        );
+    }
 }
 
 export default Vehicles;
