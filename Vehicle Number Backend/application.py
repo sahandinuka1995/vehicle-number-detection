@@ -1,17 +1,13 @@
+from dataclasses import dataclass
+
 from flask import Flask, request, jsonify, make_response
-from flask_sqlalchemy import SQLAlchemy
-import os
-from sqlalchemy.sql import select
-from sqlalchemy.orm import sessionmaker
-import json
-from json import JSONEncoder
-import base64
 from flask_cors import CORS, cross_origin
+from flask_sqlalchemy import SQLAlchemy
 
 application = Flask(__name__)
 cors = CORS(application)
 
-# application.config[
+# application.config[s
 #     'SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:12345678@aaxunchuu0gulp.c8pmpqzflrw9.us-east-1.rds.amazonaws.com:3306/ebdb"
 application.config[
     'SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:root@localhost:3306/ebdb"
@@ -20,16 +16,21 @@ application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 application.config['CORS_HEADERS'] = 'Content-Type'
 
 
+@dataclass
 class Vehicle(db.Model):
+    id: int
+    name: str
+    vehicleNo: str
+    model: str
+    colour: str
+    type: str
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=False, nullable=False)
     vehicleNo = db.Column(db.String(120), unique=False, nullable=False)
     model = db.Column(db.String(100), unique=False, nullable=False)
     colour = db.Column(db.String(100), unique=False, nullable=False)
     type = db.Column(db.String(100), unique=False, nullable=False)
-
-    def __repr__(self):
-        return '<Vehicle %r>' % self.name
 
     def __init__(self, name, vehicleNo, model, colour, type):
         self.name = name
@@ -38,8 +39,8 @@ class Vehicle(db.Model):
         self.colour = colour
         self.type = type
 
-    def toString(self):
-        return self.name + '' + self.vehicleNo + '' + self.model + '' + self.colour + '' + self.type
+    def __repr__(self):
+        return f"['name'=>{self.name}, 'vehicleNo'=>{self.vehicleNo}, 'model'=>{self.model}, 'colour'=>{self.colour}, 'type'=>{self.type}]"
 
 
 class User(db.Model):
@@ -61,75 +62,57 @@ db.session.commit()
 
 @application.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>"
+    return "<p>Welcome!</p>"
 
 
-@application.route("/search-vehicle/")
-def search_vehicle():
-    name = request.args.get('name')
-
-    vehicle = Vehicle.query.filter_by().all()
-    print(Vehicle.toString(vehicle))
-
-    return make_response(jsonify({
-        "success": "true",
-        "status": "200",
-        "data": ''
-    }), 200)
-
-
-@application.route("/all-vehicle/")
-@cross_origin()
-def all_vehicle():
-    vehicles = Vehicle.query.filter_by().all()
-    for i in vehicles:
-        print(type(i))
-
-    return make_response(jsonify({
-        "success": "true",
-        "status": "200",
-        "data": ''
-    }), 200)
-
-
-@application.route("/add-vehicle", methods=['POST'])
-@cross_origin()
-def add_vehicle():
-    data = request.get_json()
-    result = ''
+def getAllVehicles():
     try:
-        vehicle = Vehicle(name=data['name'], vehicleNo=data['vehicleNo'], model=data['model'], colour=data['colour'],
+        vehicle = Vehicle.query.filter_by().order_by(Vehicle.id.desc()).all()
+        return make_response(jsonify({
+            "success": "true",
+            "status": "200",
+            "data": vehicle
+        }), 200)
+    except:
+        return errorResponse()
+
+
+def addNewVehicle(data):
+    try:
+        vehicle = Vehicle(name=data['name'], vehicleNo=data['vehicleNo'], model=data['model'],
+                          colour=data['colour'],
                           type=data['type'])
+        print(vehicle)
         db.session.add(vehicle)
         db.session.commit()
 
-        result = make_response(jsonify({
+        return make_response(jsonify({
             "success": "true",
             "msg": "Vehicle added successfully!",
             "status": "200"
         }), 200)
     except:
-        result = make_response(jsonify({
-            "success": "false",
-            "msg": "Something went wrong",
-            "status": "500"
-        }), 500)
+        return errorResponse()
+
+
+def errorResponse():
+    return make_response(jsonify({
+        "success": "false",
+        "msg": "Something went wrong",
+        "status": "500"
+    }), 500)
+
+
+@application.route("/vehicle", methods=['POST', 'GET', 'PATCH', 'PUT', 'DELETE'])
+@cross_origin()
+def vehicle():
+    result = ''
+
+    if request.method == 'GET':
+        result = getAllVehicles()
+
+    elif request.method == 'POST':
+        data = request.get_json()
+        result = addNewVehicle(data)
 
     return result
-
-
-@application.route('/register/', methods=['POST'])
-def login():
-    email = request.form.get('email')
-    password = request.form.get('password')
-    vehicleNo = request.form.get('vehicleNo')
-
-    user = User(email=email, password=base64.b64encode(password), vehicleNo=vehicleNo)
-    db.session.add(user)
-    db.session.commit()
-
-    return make_response(jsonify({
-        "success": "true",
-        "msg": "User added successfully!",
-        "status": "200"
-    }), 200)

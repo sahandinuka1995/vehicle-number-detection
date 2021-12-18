@@ -11,28 +11,57 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
-import {vehicleTable} from '../../const/tables'
-import {strings} from "../../const/strings";
+import {vehicleTableColumn} from '../../const/tables'
 import AddNew from './addNew'
 import React, {Component} from "react";
 import {getAllVehicles} from "../../services/vehicle";
-
-const data = vehicleTable
+import MDButton from "../../components/MDButton";
 
 class Vehicles extends Component {
 
+    state = {
+        vehicles: []
+    }
+
     componentDidMount() {
+        this.getAllVehicles()
+    }
+
+    getAllVehicles = () => {
         getAllVehicles().then(res => {
-            console.log(res)
+            if (res.data.success) {
+                this.setState({
+                    vehicles: res.data.data
+                })
+            }
         })
     }
 
     render() {
+        let row = []
+        this.state.vehicles.map(v => {
+            row.push({
+                ownerName: v.name,
+                vehicleNo: v.vehicleNo,
+                model: v.model,
+                colour: v.colour,
+                type: v.type,
+                action: (<>
+                    <MDButton variant="gradient" color="warning">
+                        Edit
+                    </MDButton>
+                    <MDButton style={{marginLeft: 10}} variant="gradient" color="error">
+                        Delete
+                    </MDButton>
+                </>),
+            })
+        })
+
         return (
             <DashboardLayout>
                 <DashboardNavbar/>
                 <div align={'right'}>
-                    <AddNew/>
+                    <AddNew loadAll={this.getAllVehicles}/>
                 </div>
                 <MDBox pt={6} pb={3}>
                     <Grid container spacing={6}>
@@ -54,7 +83,7 @@ class Vehicles extends Component {
                                 </MDBox>
                                 <MDBox pt={3}>
                                     <DataTable
-                                        table={data}
+                                        table={{columns: vehicleTableColumn, rows: row}}
                                         isSorted={false}
                                         entriesPerPage={false}
                                         showTotalEntries={false}

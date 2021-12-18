@@ -7,7 +7,7 @@ import api from './apiHandler'
 
 export async function addVehicle(data) {
     let apiConfig = {}
-    apiConfig.url = `add-vehicle`
+    apiConfig.url = `vehicle`
     apiConfig.type = 'POST'
     apiConfig.body = data
     return await api(apiConfig)
@@ -15,7 +15,7 @@ export async function addVehicle(data) {
 
 export async function getAllVehicles() {
     let apiConfig = {}
-    apiConfig.url = `all-vehicle`
+    apiConfig.url = `vehicle`
     apiConfig.type = 'GET'
     apiConfig.body = null
     return await api(apiConfig)

@@ -11,7 +11,7 @@ export default async function api(apiConfig) {
     await axios({
         method: apiConfig.type,
         url: `${endpoint.host}/${apiConfig.url}`,
-        // data: apiConfig.body
+        data: apiConfig.body
     }).then(async (res) => {
         result = await res
     });

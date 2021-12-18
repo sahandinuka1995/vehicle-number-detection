@@ -9,7 +9,6 @@ import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Icon from "@mui/material/Icon";
 import {strings} from "../../const/strings";
@@ -57,6 +56,7 @@ export default class AddVehicle extends Component {
 
         await addVehicle(data).then((res) => {
             if (res.data.success) {
+                this.props.loadAll()
                 this.handleClickOpen(false)
             }
         })
