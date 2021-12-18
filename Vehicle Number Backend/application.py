@@ -95,6 +95,38 @@ def addNewVehicle(data):
         return errorResponse()
 
 
+def updateVehicle(data):
+    try:
+        vehicle = Vehicle.query.filter_by(id=data['id']).first()
+        vehicle.name = data['name']
+        vehicle.vehicleNo = data['vehicleNo']
+        vehicle.model = data['model']
+        vehicle.colour = data['colour']
+        vehicle.type = data['type']
+        db.session.commit()
+
+        return make_response(jsonify({
+            "success": "true",
+            "msg": "Vehicle update successfully!",
+            "status": "200"
+        }), 200)
+    except:
+        return errorResponse()
+
+
+def deleteVehicle(data):
+    try:
+        Vehicle.query.filter_by(id=request.args.get('id')).delete()
+        db.session.commit()
+        return make_response(jsonify({
+            "success": "true",
+            "msg": "Vehicle deleted successfully!",
+            "status": "200"
+        }), 200)
+    except:
+        return errorResponse()
+
+
 def errorResponse():
     return make_response(jsonify({
         "success": "false",
@@ -115,4 +147,28 @@ def vehicle():
         data = request.get_json()
         result = addNewVehicle(data)
 
+    elif request.method == 'PUT':
+        data = request.get_json()
+        result = updateVehicle(data)
+
+    elif request.method == 'DELETE':
+        data = request.get_json()
+        result = deleteVehicle(data)
+
     return result
+
+
+@application.route("/dashboard", methods=['GET'])
+@cross_origin()
+def dashboard():
+    try:
+        vehicle = Vehicle.query.filter_by().count()
+        return make_response(jsonify({
+            "success": "true",
+            "data": {
+                "noOfVehicles": vehicle
+            },
+            "status": "200"
+        }), 200)
+    except:
+        return errorResponse()

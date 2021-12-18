@@ -13,6 +13,22 @@ export async function addVehicle(data) {
     return await api(apiConfig)
 }
 
+export async function updateVehicle(data) {
+    let apiConfig = {}
+    apiConfig.url = `vehicle`
+    apiConfig.type = 'PUT'
+    apiConfig.body = data
+    return await api(apiConfig)
+}
+
+export async function deleteVehicle(id) {
+    let apiConfig = {}
+    apiConfig.url = `vehicle?id=${id}`
+    apiConfig.type = 'DELETE'
+    apiConfig.body = null
+    return await api(apiConfig)
+}
+
 export async function getAllVehicles() {
     let apiConfig = {}
     apiConfig.url = `vehicle`

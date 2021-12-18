@@ -16,6 +16,8 @@ import AddNew from './addNew'
 import React, {Component} from "react";
 import {getAllVehicles} from "../../services/vehicle";
 import MDButton from "../../components/MDButton";
+import UpdateVehicle from "./update";
+import DeleteVehicle from "./delete";
 
 class Vehicles extends Component {
 
@@ -46,14 +48,10 @@ class Vehicles extends Component {
                 model: v.model,
                 colour: v.colour,
                 type: v.type,
-                action: (<>
-                    <MDButton variant="gradient" color="warning">
-                        Edit
-                    </MDButton>
-                    <MDButton style={{marginLeft: 10}} variant="gradient" color="error">
-                        Delete
-                    </MDButton>
-                </>),
+                action: (<div style={{display: 'flex'}}>
+                    <UpdateVehicle loadAll={this.getAllVehicles} data={v}/>
+                    <DeleteVehicle loadAll={this.getAllVehicles} id={v}/>
+                </div>),
             })
         })
 

@@ -14,6 +14,7 @@ export const strings = {
 
     // vehicle
     addNewVehicle: "Add New Vehicle",
+    updateVehicle: "Update Vehicle",
     vehicleNo: "Vehicle No",
     model: "Model",
     colour: "Colour",
