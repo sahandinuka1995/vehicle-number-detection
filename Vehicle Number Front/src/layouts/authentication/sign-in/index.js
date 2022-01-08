@@ -40,7 +40,8 @@ function Basic() {
                             <MDInput type="password" label="Password" fullWidth/>
                         </MDBox>
                         <MDBox mt={4} mb={1}>
-                            <MDButton variant="gradient" color="info" fullWidth>
+                            <MDButton variant="gradient" color="info"
+                                      onClick={() => window.location.href = '/dashboard'} fullWidth>
                                 sign in
                             </MDButton>
                         </MDBox>

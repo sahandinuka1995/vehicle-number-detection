@@ -18,6 +18,8 @@ import {getAllVehicles} from "../../services/vehicle";
 import MDButton from "../../components/MDButton";
 import UpdateVehicle from "./update";
 import DeleteVehicle from "./delete";
+import {strings} from "../../const/strings";
+import TextField from "@mui/material/TextField";
 
 class Vehicles extends Component {
 
@@ -58,7 +60,19 @@ class Vehicles extends Component {
         return (
             <DashboardLayout>
                 <DashboardNavbar/>
-                <div align={'right'}>
+                <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                    <div>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="name"
+                            label={strings.vehicleNo}
+                            type="text"
+                            variant="standard"
+                            onChange={this.onInputHandler}
+                            name={'vehicleNo'}
+                        />
+                    </div>
                     <AddNew loadAll={this.getAllVehicles}/>
                 </div>
                 <MDBox pt={6} pb={3}>
