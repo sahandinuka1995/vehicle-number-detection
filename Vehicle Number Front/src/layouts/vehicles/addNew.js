@@ -22,6 +22,7 @@ import {addVehicle} from '../../services/vehicle'
 import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import '../../scss/style.scss'
+import axios from "axios";
 
 export default class AddVehicle extends Component {
 
@@ -59,20 +60,33 @@ export default class AddVehicle extends Component {
 
     onSubmit = async () => {
         let state = this.state
-        let data = {
-            name: 'Sahan',
-            vehicleNo: state.vehicleNo,
-            model: state.model,
-            colour: state.colour,
-            type: state.type
-        }
+        console.log(state)
 
-        await addVehicle(data).then((res) => {
-            if (res.data.success) {
-                this.props.loadAll()
-                this.handleClickOpen(false)
-            }
+        let form = new FormData()
+        form.append('name', 'Sahan')
+        form.append('vehicleNo', state.vehicleNo)
+        form.append('model', state.model)
+        form.append('colour', state.colour)
+        form.append('type', state.type)
+        form.append('file', state.src)
+
+        axios({
+            method: "post",
+            url: "http://localhost:5000/vehicle",
+            data: form,
+            headers: {"content-type": "multipart/form-data"},
         })
+            .then(function (response) {
+                //handle success
+                console.log(response);
+            })
+
+        // await addVehicle(form).then((res) => {
+        //     if (res.data.success) {
+        //         this.props.loadAll()
+        //         this.handleClickOpen(false)
+        //     }
+        // })
     }
 
     onSelectFile = (e) => {
@@ -166,113 +180,123 @@ export default class AddVehicle extends Component {
                 </MDButton>
                 <Dialog open={this.state.open} onClose={() => this.handleClickOpen(false)} maxWidth={'sm'}
                         fullWidth={true}>
-                    <DialogTitle>{strings.addNewVehicle}</DialogTitle>
-                    <DialogContent>
-                        <Grid container spacing={2}>
-                            {!this.state.isCropped ? <Grid item md={12}>
-                                    <div className="App">
-                                        <div>
-                                            <div>
-                                                <input type="file" accept="image/*" onChange={this.onSelectFile}/>
-                                            </div>
-                                            {src && (
-                                                <ReactCrop
-                                                    src={src}
-                                                    crop={crop}
-                                                    ruleOfThirds
-                                                    onImageLoaded={this.onImageLoaded}
-                                                    onComplete={this.onCropComplete}
-                                                    onChange={this.onCropChange}
-                                                />
-                                            )}
+                    <form method="post" action="http://localhost:5000/vehicle"
+                          enctype="multipart/form-data">
+                        <DialogTitle>{strings.addNewVehicle}</DialogTitle>
+                        <DialogContent>
+                            <Grid container spacing={2}>
+                                {!this.state.isCropped ? <Grid item md={12}>
+                                        <div className="App">
+                                            {/*<div>*/}
+                                            {/*    <div>*/}
+                                            {/*        <input type="file" accept="image/*" onChange={this.onSelectFile}/>*/}
+                                            {/*    </div>*/}
+                                            {/*    {src && (*/}
+                                            {/*        <ReactCrop*/}
+                                            {/*            src={src}*/}
+                                            {/*            crop={crop}*/}
+                                            {/*            ruleOfThirds*/}
+                                            {/*            onImageLoaded={this.onImageLoaded}*/}
+                                            {/*            onComplete={this.onCropComplete}*/}
+                                            {/*            onChange={this.onCropChange}*/}
+                                            {/*        />*/}
+                                            {/*    )}*/}
+                                            {/*</div>*/}
+                                            {/*{croppedImageUrl && (*/}
+                                            {/*    <div align={'center'}>*/}
+                                            {/*        <img alt="Crop" style={{maxWidth: '100%'}} src={croppedImageUrl}/>*/}
+                                            {/*    </div>*/}
+                                            {/*)}*/}
+                                            <input type="file" name="file"
+                                                   className="form-control" autoComplete="off"
+                                                   required />
                                         </div>
-                                        {croppedImageUrl && (
-                                            <div align={'center'}>
-                                                <img alt="Crop" style={{maxWidth: '100%'}} src={croppedImageUrl}/>
-                                            </div>
-                                        )}
-                                    </div>
-                                </Grid> :
+                                    </Grid> :
+                                    <>
+                                        <Grid item md={6}>
+                                            <input type="file" name="file"
+                                                   className="form-control" autoComplete="off"
+                                                   required />
+                                            <TextField
+                                                autoFocus
+                                                margin="dense"
+                                                id="name"
+                                                label={strings.vehicleNo}
+                                                type="text"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={this.onInputHandler}
+                                                name={'vehicleNo'}
+                                            />
+                                        </Grid>
+                                        <Grid item md={6}>
+                                            <TextField
+                                                autoFocus
+                                                margin="dense"
+                                                id="name"
+                                                label={strings.model}
+                                                type="text"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={this.onInputHandler}
+                                                name={'model'}
+                                            />
+                                        </Grid>
+                                        <Grid item md={6}>
+                                            <TextField
+                                                autoFocus
+                                                margin="dense"
+                                                id="name"
+                                                label={strings.colour}
+                                                type="text"
+                                                fullWidth
+                                                variant="standard"
+                                                onChange={this.onInputHandler}
+                                                name={'colour'}
+                                            />
+                                        </Grid>
+                                        <Grid item md={6}>
+                                            <Box sx={{minWidth: 120}} style={{marginTop: 15}}>
+                                                <FormControl fullWidth>
+                                                    <InputLabel id="demo-simple-select-label">Type</InputLabel>
+                                                    <Select
+                                                        labelId="demo-simple-select-label"
+                                                        id="demo-simple-select"
+                                                        label="Age"
+                                                        onChange={this.onInputHandler}
+                                                        style={{height: 40}}
+                                                        name={'type'}
+                                                    >
+                                                        <MenuItem value={'BIKE'}>Bike</MenuItem>
+                                                        <MenuItem value={'THREE_WHEEL'}>Three Wheel</MenuItem>
+                                                        <MenuItem value={'CAR'}>Car</MenuItem>
+                                                        <MenuItem value={'VAN'}>Van</MenuItem>
+                                                        <MenuItem value={'BUS'}>Bus</MenuItem>
+                                                        <MenuItem value={'LORRY'}>Lorry</MenuItem>
+                                                        <MenuItem value={'TIPER'}>Tiper</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Box>
+                                        </Grid>
+                                    </>
+                                }
+
+                            </Grid>
+                        </DialogContent>
+                        <DialogActions>
+
+                            {this.state.isCropped ?
                                 <>
-                                    <Grid item md={6}>
-                                        <TextField
-                                            autoFocus
-                                            margin="dense"
-                                            id="name"
-                                            label={strings.vehicleNo}
-                                            type="text"
-                                            fullWidth
-                                            variant="standard"
-                                            onChange={this.onInputHandler}
-                                            name={'vehicleNo'}
-                                        />
-                                    </Grid>
-                                    <Grid item md={6}>
-                                        <TextField
-                                            autoFocus
-                                            margin="dense"
-                                            id="name"
-                                            label={strings.model}
-                                            type="text"
-                                            fullWidth
-                                            variant="standard"
-                                            onChange={this.onInputHandler}
-                                            name={'model'}
-                                        />
-                                    </Grid>
-                                    <Grid item md={6}>
-                                        <TextField
-                                            autoFocus
-                                            margin="dense"
-                                            id="name"
-                                            label={strings.colour}
-                                            type="text"
-                                            fullWidth
-                                            variant="standard"
-                                            onChange={this.onInputHandler}
-                                            name={'colour'}
-                                        />
-                                    </Grid>
-                                    <Grid item md={6}>
-                                        <Box sx={{minWidth: 120}} style={{marginTop: 15}}>
-                                            <FormControl fullWidth>
-                                                <InputLabel id="demo-simple-select-label">Type</InputLabel>
-                                                <Select
-                                                    labelId="demo-simple-select-label"
-                                                    id="demo-simple-select"
-                                                    label="Age"
-                                                    onChange={this.onInputHandler}
-                                                    style={{height: 40}}
-                                                    name={'type'}
-                                                >
-                                                    <MenuItem value={'BIKE'}>Bike</MenuItem>
-                                                    <MenuItem value={'THREE_WHEEL'}>Three Wheel</MenuItem>
-                                                    <MenuItem value={'CAR'}>Car</MenuItem>
-                                                    <MenuItem value={'VAN'}>Van</MenuItem>
-                                                    <MenuItem value={'BUS'}>Bus</MenuItem>
-                                                    <MenuItem value={'LORRY'}>Lorry</MenuItem>
-                                                    <MenuItem value={'TIPER'}>Tiper</MenuItem>
-                                                </Select>
-                                            </FormControl>
-                                        </Box>
-                                    </Grid>
-                                </>
-                            }
-
-                        </Grid>
-                    </DialogContent>
-                    <DialogActions>
-
-                        {this.state.isCropped ?
-                            <>
-                                <Button onClick={() => this.setState({isCropped: false})}>Back</Button>
-                                <Button onClick={this.onSubmit}>Save</Button>
-                            </> :
-                            <>
-                                <Button onClick={() => this.handleClickOpen(false)}>Cancel</Button>
-                                <Button onClick={() => this.setState({isCropped: true})}>Next</Button>
-                            </>}
-                    </DialogActions>
+                                    <Button onClick={() => this.setState({isCropped: false})}>Back</Button>
+                                    {/*<Button onClick={this.onSubmit}>Save</Button>*/}
+                                    <input type="submit" value="Submit" className="btn btn-info"/>
+                                </> :
+                                <>
+                                    <Button onClick={() => this.handleClickOpen(false)}>Cancel</Button>
+                                    <Button onClick={() => this.setState({isCropped: true})}>Next</Button>
+                                </>}
+                        </DialogActions>
+                    </form>
                 </Dialog>
             </div>
         );

@@ -10,6 +10,7 @@ export async function addVehicle(data) {
     apiConfig.url = `vehicle`
     apiConfig.type = 'POST'
     apiConfig.body = data
+    apiConfig.multipart = true
     return await api(apiConfig)
 }
 
