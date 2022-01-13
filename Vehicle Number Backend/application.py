@@ -1,13 +1,14 @@
 from dataclasses import dataclass
 
-from flask import Flask, request, jsonify, make_response, render_template
+from flask import Flask, request, jsonify, make_response, render_template, url_for
 from flask_cors import CORS, cross_origin
 from flask_sqlalchemy import SQLAlchemy
 import pytesseract as tess
-from werkzeug.utils import secure_filename
+from werkzeug.utils import secure_filename, redirect
 import os
 import urllib.request
 import cv2
+from flask_awscognito import AWSCognitoAuthentication
 
 application = Flask(__name__)
 UPLOAD_FOLDER = 'data/vehicles/'
@@ -25,6 +26,15 @@ application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 application.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+
+application.config['AWS_DEFAULT_REGION'] = 'eu-west-1'
+application.config['AWS_COGNITO_DOMAIN'] = 'https://sahan-flask-app.auth.us-east-1.amazoncognito.com'
+application.config['AWS_COGNITO_USER_POOL_ID'] = 'us-east-1_XL5t7GWlN'
+application.config['AWS_COGNITO_USER_POOL_CLIENT_ID'] = 'gmkkii61vfqi4b1s1iismls9t'
+application.config['AWS_COGNITO_USER_POOL_CLIENT_SECRET'] = 'stgbv3b1bpucrpb7fh6g7rbv3nh0dv4g4pi5b1740o9b36mi02r'
+application.config['AWS_COGNITO_REDIRECT_URL'] = 'http://localhost:5000/success'
+
+aws_auth = AWSCognitoAuthentication(application)
 
 
 @dataclass
@@ -243,3 +253,24 @@ def dashboard():
         }), 200)
     except:
         return errorResponse()
+
+
+@application.route('/auth')
+@cross_origin()
+@aws_auth.authentication_required
+def index():
+    claims = aws_auth.claims  # also available through g.cognito_claims
+    return jsonify({'claims': claims})
+
+
+@application.route('/success')
+@cross_origin()
+def aws_cognito_redirect():
+    access_token = aws_auth.get_access_token(request.args)
+    return redirect('http://localhost:3000/dashboard?token=' + access_token)
+
+
+@application.route('/sign_in')
+@cross_origin()
+def sign_in():
+    return redirect(aws_auth.get_sign_in_url())
