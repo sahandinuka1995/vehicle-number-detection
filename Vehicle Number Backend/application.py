@@ -35,7 +35,7 @@ class Vehicle(db.Model):
     model: str
     colour: str
     type: str
-    image: str
+    # image: str
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=False, nullable=False)
@@ -43,18 +43,19 @@ class Vehicle(db.Model):
     model = db.Column(db.String(100), unique=False, nullable=False)
     colour = db.Column(db.String(100), unique=False, nullable=False)
     type = db.Column(db.String(100), unique=False, nullable=False)
-    image = db.Column(db.String(100), unique=False, nullable=False)
 
-    def __init__(self, name, vehicleNo, model, colour, type, image):
+    # image = db.Column(db.String(100), unique=False, nullable=False)
+
+    def __init__(self, name, vehicleNo, model, colour, type):
         self.name = name
         self.vehicleNo = vehicleNo
         self.model = model
         self.colour = colour
         self.type = type
-        self.image = image
+        # self.image = image
 
     def __repr__(self):
-        return f"['name'=>{self.name}, 'vehicleNo'=>{self.vehicleNo}, 'model'=>{self.model}, 'colour'=>{self.colour}, 'type'=>{self.type}, 'image'=>{self.image}]"
+        return f"['name'=>{self.name}, 'vehicleNo'=>{self.vehicleNo}, 'model'=>{self.model}, 'colour'=>{self.colour}, 'type'=>{self.type}]"
 
 
 class User(db.Model):
@@ -84,81 +85,48 @@ def hello_world():
 
 
 def getAllVehicles():
-    return render_template('index.html')
+    all = Vehicle.query.all()
+
+    return make_response(jsonify({
+        "success": True,
+        "status": "200",
+        "data": all
+    }), 200)
+
+
+import boto3
+
+s3 = boto3.resource('s3')
+
+client = boto3.client(
+    's3',
+    aws_access_key_id="AKIAVWQ26W5I5VEIOOU2",
+    aws_secret_access_key="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"
+)
 
 
 def addNewVehicle(data):
-    # try:
-    #     # vehicle = Vehicle(name=data['name'], vehicleNo=data['vehicleNo'], model=data['model'],
-    #     #                   colour=data['colour'],
-    #     #                   type=data['type'])
-    #
-    #     # print(data['image'])
-    #     # file = data.files['file']
-    #     # print(data.files['image'])
-    #     # filename = secure_filename(file.filename)
-    #     # file.save(os.path.join(application.config['UPLOAD_FOLDER'], filename))
-    #     # print(vehicle)
-    #     # f = request.files['file']
-    #
-    #
-    #     # db.session.add(vehicle)
-    #     # db.session.commit()
-    #
-    #     return make_response(jsonify({
-    #         "success": "true",
-    #         "msg": "Vehicle added successfully!",
-    #         "status": "200"
-    #     }), 200)
-    # except:
-    #     return errorResponse()
+    vehicle = Vehicle(name=data.form['name'], vehicleNo=data.form['vehicleNo'], model=data.form['model'],
+                      colour=data.form['colour'],
+                      type=data.form['type'])
 
-    import pytesseract
-
-    tess.pytesseract.tesseract_cmd = r'D:\Users\User\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
-    img = cv2.imread("1.jpg")
-
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    ret, thresh1 = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU | cv2.THRESH_BINARY_INV)
-    rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (18, 18))
-
-    dilation = cv2.dilate(thresh1, rect_kernel, iterations=1)
-    contours, hierarchy = cv2.findContours(dilation, cv2.RETR_EXTERNAL,
-                                           cv2.CHAIN_APPROX_NONE)
-    im2 = img.copy()
-    file = open("recognized.txt", "w+")
-    file.write("")
-    file.close()
-
-    for cnt in contours:
-        x, y, w, h = cv2.boundingRect(cnt)
-
-        # Drawing a rectangle on copied image
-        rect = cv2.rectangle(im2, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-        # Cropping the text block for giving input to OCR
-        cropped = im2[y:y + h, x:x + w]
-
-        # Open the file in append mode
-        file = open("recognized.txt", "a")
-
-        # Apply OCR on the cropped image
-        text = pytesseract.image_to_string(cropped)
-        print(text)
-
-        # Appending the text into file
-        # file.write(text)
-        # file.write("\n")
+    db.session.add(vehicle)
+    db.session.commit()
+    try:
+        # vehicle = Vehicle(name=data.form['name'], vehicleNo=data.form['vehicleNo'], model=data.form['model'], colour=data.form['colour'],
+        #                   type=data.form['type'])
         #
-        # # Close the file
-        # file.close
+        # db.session.add(vehicle)
+        # db.session.commit()
 
-    return make_response(jsonify({
-        "success": "true",
-        "msg": "Vehicle added successfully!",
-        "status": "200"
-    }), 200)
+        return make_response(jsonify({
+            "success": True,
+            "msg": "Vehicle update successfully!",
+            "status": "200",
+        }), 200)
+
+    except:
+        return errorResponse()
 
 
 def updateVehicle(data):
@@ -219,6 +187,44 @@ def vehicle():
     elif request.method == 'DELETE':
         data = request.get_json()
         result = deleteVehicle(data)
+
+    return result
+
+
+@application.route("/getNumber", methods=['POST'])
+@cross_origin()
+def imageToText():
+    result = ''
+
+    if request.method == 'POST':
+        try:
+            file = request.files['file']
+
+            file_name = secure_filename(file.filename)
+            file.save(file_name)
+
+            bucket_name = "sample-bucket-sahan"
+            response = client.upload_file(file_name, bucket_name, file_name, ExtraArgs={
+                'ACL': 'public-read'
+            })
+
+            bucket_name = "sample-bucket-sahan"
+            res = client.download_file(bucket_name, file_name, '/New_Project_2.jpg')
+
+            tess.pytesseract.tesseract_cmd = r'D:\Users\User\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+            from PIL import Image
+
+            img = Image.open(file_name)
+            text = tess.image_to_string(img)
+
+            return make_response(jsonify({
+                "success": True,
+                "status": "200",
+                "data": text
+            }), 200)
+
+        except:
+            return errorResponse()
 
     return result
 
