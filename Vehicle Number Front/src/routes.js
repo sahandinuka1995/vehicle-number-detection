@@ -1,13 +1,9 @@
 import Dashboard from "layouts/dashboard";
-import Tables from "layouts/tables";
-import Billing from "layouts/billing";
-import RTL from "layouts/rtl";
-import Notifications from "layouts/notifications";
-import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
-import SignUp from "layouts/authentication/sign-up";
 import Vehicles from "layouts/vehicles";
 import Icon from "@mui/material/Icon";
+import AllVehicles from "./layouts/allvehicles";
+import Realtime from "./layouts/realtime";
 
 const routes = [
     {
@@ -20,11 +16,27 @@ const routes = [
     },
     {
         type: "collapse",
-        name: "Vehicles",
+        name: "Local Vehicles",
         key: "vehicles",
         icon: <Icon fontSize="small">directions_car</Icon>,
         route: "/vehicles",
         component: <Vehicles/>,
+    },
+    {
+        type: "collapse",
+        name: "All Vehicles",
+        key: "allVehicles",
+        icon: <Icon fontSize="small">directions_car</Icon>,
+        route: "/all-vehicles",
+        component: <AllVehicles/>,
+    },
+    {
+        type: "collapse",
+        name: "Realtime",
+        key: "realtime",
+        icon: <Icon fontSize="small">watch</Icon>,
+        route: "/realtime",
+        component: <Realtime/>,
     },
     // {
     //     type: "collapse",
