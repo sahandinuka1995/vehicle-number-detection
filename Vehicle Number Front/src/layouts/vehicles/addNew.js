@@ -171,6 +171,7 @@ export default class AddVehicle extends Component {
     }
 
     onFileHandler = async (event) => {
+        console.log(event.target.files[0])
         await this.setState({src: event.target.files[0], isLoading: true})
 
         event.preventDefault()

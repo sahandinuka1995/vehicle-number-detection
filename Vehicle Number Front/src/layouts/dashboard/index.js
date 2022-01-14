@@ -17,7 +17,10 @@ const {sales, tasks} = reportsLineChartData;
 class Dashboard extends Component {
 
     state = {
-        noOfVehicles: 0
+        noOfVehicles: 0,
+        activeVehicles: 0,
+        revenue: 0,
+        unsettleVehicles: 0,
     }
 
     componentDidMount() {
@@ -25,7 +28,10 @@ class Dashboard extends Component {
             console.log(res)
             if (res.data.success) {
                 this.setState({
-                    noOfVehicles: res.data.data.noOfVehicles
+                    noOfVehicles: res.data.data.noOfVehicles,
+                    activeVehicles: res.data.data.activeVehicles,
+                    revenue: res.data.data.revenue,
+                    unsettleVehicles: res.data.data.unsettleVehicles,
                 })
             }
         })
@@ -57,7 +63,7 @@ class Dashboard extends Component {
                                 <ComplexStatisticsCard
                                     icon="leaderboard"
                                     title={strings.activeVehicles}
-                                    count="2,300"
+                                    count={this.state.activeVehicles}
                                     percentage={{
                                         color: "success",
                                         amount: "+3%",
@@ -72,7 +78,7 @@ class Dashboard extends Component {
                                     color="success"
                                     icon="store"
                                     title="Revenue"
-                                    count="34k"
+                                    count={this.state.revenue}
                                     percentage={{
                                         color: "success",
                                         amount: "+1%",
@@ -87,7 +93,7 @@ class Dashboard extends Component {
                                     color="primary"
                                     icon="person_add"
                                     title={strings.unsettleVehicles}
-                                    count="+91"
+                                    count={this.state.unsettleVehicles}
                                     percentage={{
                                         color: "success",
                                         amount: "",

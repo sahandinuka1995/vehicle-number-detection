@@ -9,15 +9,20 @@ import os
 import urllib.request
 import cv2
 from flask_awscognito import AWSCognitoAuthentication
+import json
+
+with open("config.json") as jsonFile:
+    jsonObject = json.load(jsonFile)
+    jsonFile.close()
 
 application = Flask(__name__)
 UPLOAD_FOLDER = 'data/vehicles/'
 cors = CORS(application)
 
-# application.config[s
-#     'SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:12345678@aaxunchuu0gulp.c8pmpqzflrw9.us-east-1.rds.amazonaws.com:3306/ebdb"
 application.config[
-    'SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:root@localhost:3306/ebdb"
+    'SQLALCHEMY_DATABASE_URI'] = jsonObject['dburl']
+# application.config[
+#     'SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:root@localhost:3306/ebdb"
 db = SQLAlchemy(application)
 application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 application.config['CORS_HEADERS'] = 'Content-Type'
@@ -27,12 +32,12 @@ application.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
-application.config['AWS_DEFAULT_REGION'] = 'eu-west-1'
-application.config['AWS_COGNITO_DOMAIN'] = 'https://sahan-flask-app.auth.us-east-1.amazoncognito.com'
-application.config['AWS_COGNITO_USER_POOL_ID'] = 'us-east-1_XL5t7GWlN'
-application.config['AWS_COGNITO_USER_POOL_CLIENT_ID'] = 'gmkkii61vfqi4b1s1iismls9t'
-application.config['AWS_COGNITO_USER_POOL_CLIENT_SECRET'] = 'stgbv3b1bpucrpb7fh6g7rbv3nh0dv4g4pi5b1740o9b36mi02r'
-application.config['AWS_COGNITO_REDIRECT_URL'] = 'http://localhost:5000/success'
+application.config['AWS_DEFAULT_REGION'] = jsonObject['AWS_DEFAULT_REGION']
+application.config['AWS_COGNITO_DOMAIN'] = jsonObject['AWS_COGNITO_DOMAIN']
+application.config['AWS_COGNITO_USER_POOL_ID'] = jsonObject['AWS_COGNITO_USER_POOL_ID']
+application.config['AWS_COGNITO_USER_POOL_CLIENT_ID'] = jsonObject['AWS_COGNITO_USER_POOL_CLIENT_ID']
+application.config['AWS_COGNITO_USER_POOL_CLIENT_SECRET'] = jsonObject['AWS_COGNITO_USER_POOL_CLIENT_SECRET']
+application.config['AWS_COGNITO_REDIRECT_URL'] = jsonObject['AWS_COGNITO_REDIRECT_URL']
 
 aws_auth = AWSCognitoAuthentication(application)
 
@@ -110,8 +115,8 @@ s3 = boto3.resource('s3')
 
 client = boto3.client(
     's3',
-    aws_access_key_id="AKIAVWQ26W5I5VEIOOU2",
-    aws_secret_access_key="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"
+    aws_access_key_id=jsonObject['aws_access_key_id'],
+    aws_secret_access_key=jsonObject['aws_secret_access_key']
 )
 
 
@@ -171,10 +176,10 @@ def deleteVehicle(data):
         return errorResponse()
 
 
-def errorResponse():
+def errorResponse(e):
     return make_response(jsonify({
         "success": "false",
-        "msg": "Something went wrong",
+        "msg": e,
         "status": "500"
     }), 500)
 
@@ -213,12 +218,12 @@ def imageToText():
             file_name = secure_filename(file.filename)
             file.save(file_name)
 
-            bucket_name = "sample-bucket-sahan"
+            bucket_name = jsonObject['bucket_name']
             response = client.upload_file(file_name, bucket_name, file_name, ExtraArgs={
                 'ACL': 'public-read'
             })
 
-            bucket_name = "sample-bucket-sahan"
+            bucket_name = jsonObject['bucket_name']
             res = client.download_file(bucket_name, file_name, '/New_Project_2.jpg')
 
             tess.pytesseract.tesseract_cmd = r'D:\Users\User\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
@@ -233,8 +238,9 @@ def imageToText():
                 "data": text
             }), 200)
 
-        except:
-            return errorResponse()
+        except Exception as e:
+            print(e)
+            return errorResponse(e)
 
     return result
 
@@ -247,7 +253,10 @@ def dashboard():
         return make_response(jsonify({
             "success": "true",
             "data": {
-                "noOfVehicles": vehicle
+                "noOfVehicles": vehicle,
+                "activeVehicles": (vehicle - 1),
+                "revenue": "35,000",
+                "unsettleVehicles": (vehicle - 1),
             },
             "status": "200"
         }), 200)
